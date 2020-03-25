@@ -1,0 +1,8 @@
+# Makefile
+make # shows usage
+make trello # create table+views
+export PGDATABASE=doc_db
+#
+tool/loaddoc.sh data/simple_board.json # Append argument (defaults to simple.json) to database table
+tool/loaddoc.sh data/Todo.json  # Append json-file to database table
+psql -c "TRUNCATE TABLE trello RESTART IDENTITY" # Clears database table
