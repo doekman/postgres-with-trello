@@ -38,11 +38,9 @@ And to quit `psql`, type:
 
 	\q
 
-
-And now
--------
-
+The file `data/simple_board.json` is exported from [this public board][simple_board].
 
 
 [Trello]: https://trello.com/
 [export]: https://help.trello.com/article/747-exporting-data-from-trello-1
+[simple_board]: https://trello.com/b/ZWvFVK9Z/postgres-with-trello
