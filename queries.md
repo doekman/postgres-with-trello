@@ -30,10 +30,9 @@ One could also work with postgres arrays, but mixing types makes stuff more comp
 		'SELECT ARRAY(SELECT jsonb_array_elements_text(_js))'
 	;
 
-Select green (5e7b7e537669b22549566428) labeled cards:
+Select green (5e7b7e537669b22549566428) labeled cards (assuming the view `trello_card` also converts the `jsonb`-array to `text[]`):
 
 	SELECT *
 	FROM trello_card
 	WHERE (id_labels @> ARRAY['5e7b7e537669b22549566428'])
-	ORDER BY "pos";
 

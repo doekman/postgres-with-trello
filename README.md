@@ -3,6 +3,8 @@ postgres-with-trello
 
 In [Trello][], you can [export board-data to JSON][export]. In this repository, you will find SQL to work with those.
 
+The file `data/simple_board.json` is exported from [this public board][simple_board].
+
 
 Getting started
 ---------------
@@ -37,8 +39,6 @@ The last command shows all tables and views you can query from. Let's query some
 And to quit `psql`, type:
 
 	\q
-
-The file `data/simple_board.json` is exported from [this public board][simple_board].
 
 
 [Trello]: https://trello.com/

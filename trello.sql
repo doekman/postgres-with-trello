@@ -20,11 +20,58 @@ as
 	,      replace(t.doc->>'dateLastActivity','T',' ')::timestamp with time zone as date_last_activity
 	,      replace(t.doc->>'dateLastView','T',' ')::timestamp with time zone     as date_last_view
 	from trello t
+	order by 3
 ;
 
--- NIET GEBRUIKEN: prefs; labelNames (redundant); 
--- OF LATER: actions, checklists, memberships
--- Views voor: labels, lists, members
+--   views: actions, cards, checklists, labels, lists, members
+--no views: customFields, idTags, labelNames, limits, memberships, pluginData, powerUps, prefs
+
+create view trello_action as
+	select t.id                          as doc_id
+	,      c.value->>'id'                as id
+	,      c.value->>'type'              as type
+	,      c.value->>'idMemberCreator'   as id_member_creator
+	,      replace(c.value->>'date','T',' ')::timestamp with time zone as date
+	from trello t
+	,    jsonb_array_elements(t.doc#>'{actions}') c
+	order by 1
+	,        5
+;
+
+create view trello_card as
+	select t.id                          as doc_id
+	,      c.value->>'id'                as id
+	,      c.value->>'name'              as name
+	,      c.value->>'desc'              as description
+	,      (c.value->>'pos')::numeric    as pos
+	,      c.value->>'url'               as url
+	,      replace(c.value->>'due','T',' ')::timestamp with time zone as due
+	,      c.value->'dueComplete'='true' as due_complete
+	,      c.value->'closed'='true'      as closed
+	,      c.value->'subscribed'='true'  as subscribed
+	,      c.value->>'idList'            as id_list
+	,      c.value->'idLabels'           as id_labels --jsonb array[string]
+	,      c.value->'idMembers'          as id_members --jsonb array[string]
+	,      replace(c.value->>'dateLastActivity','T',' ')::timestamp with time zone as date_last_activity
+	from trello t
+	,    jsonb_array_elements(t.doc#>'{cards}') c
+	order by 1
+	,        5
+;
+
+create view trello_checklist
+as
+	select t.id                        as doc_id
+	,      c.value->>'id'              as id
+	,      c.value->>'name'            as name
+	,      (c.value->>'pos')::numeric  as pos
+	,      c.value->>'idCard'          as id_card
+	from trello t
+	,    jsonb_array_elements(t.doc#>'{checklists}') c
+	order by 1
+	,        4
+;
+
 create view trello_label
 as
 	select t.id               as doc_id
@@ -46,7 +93,8 @@ as
 	,      l.value->'subscribed'='true'  as subscribed
 	from trello t
 	,    jsonb_array_elements(t.doc#>'{lists}') l
-	order by 4
+	order by 1
+	,        4
 ;
 
 create view trello_member
@@ -64,24 +112,59 @@ as
 	,      m.value->>'status'           as status
 	from trello t
 	,    jsonb_array_elements(t.doc#>'{members}') m
+	order by 3
 ;
 
-create view trello_card as
-	select t.id                          as doc_id
-	,      c.value->>'id'                as id
-	,      c.value->>'name'              as name
-	,      c.value->>'desc'              as description
-	,      (c.value->>'pos')::numeric    as pos
-	,      c.value->>'url'               as url
-	,      replace(c.value->>'due','T',' ')::timestamp with time zone as due
-	,      c.value->'dueComplete'='true' as due_complete
-	,      c.value->'closed'='true'      as closed
-	,      c.value->'subscribed'='true'  as subscribed
-	,      c.value->>'idList'            as id_list
-	,      c.value->'idLabels'           as id_labels --jsonb array[string]
-	,      c.value->'idMembers'          as id_members --jsonb array[string]
-	,      replace(c.value->>'dateLastActivity','T',' ')::timestamp with time zone as date_last_activity
+-- other helpful views
+
+create view trello_all_ids
+as
+	select l.value->>'id'  as id
+	,      'label'         as what
+	,      array_agg(t.id) as doc_ids
 	from trello t
-	,    jsonb_array_elements(t.doc#>'{cards}') c
-	order by 5
+	,    jsonb_array_elements(t.doc#>'{labels}') l
+	group by 1
+union
+	select l.value->>'id'  as id
+	,      'list'         as what
+	,      array_agg(t.id) as doc_ids
+	from trello t
+	,    jsonb_array_elements(t.doc#>'{lists}') l
+	group by 1
+union
+	select l.value->>'id'  as id
+	,      'member'        as what
+	,      array_agg(t.id) as doc_ids
+	from trello t
+	,    jsonb_array_elements(t.doc#>'{members}') l
+	group by 1
+union
+	select l.value->>'id'  as id
+	,      'card'          as what
+	,      array_agg(t.id) as doc_ids
+	from trello t
+	,    jsonb_array_elements(t.doc#>'{cards}') l
+	group by 1
+union
+	select l.value->>'id'  as id
+	,      'action'        as what
+	,      array_agg(t.id) as doc_ids
+	from trello t
+	,    jsonb_array_elements(t.doc#>'{actions}') l
+	group by 1
+union
+	select l.value->>'id'  as id
+	,      'membership'    as what
+	,      array_agg(t.id) as doc_ids
+	from trello t
+	,    jsonb_array_elements(t.doc#>'{memberships}') l
+	group by 1
+union
+	select l.value->>'id'  as id
+	,      'checklist'     as what
+	,      array_agg(t.id) as doc_ids
+	from trello t
+	,    jsonb_array_elements(t.doc#>'{checklists}') l
+	group by 1
 ;
