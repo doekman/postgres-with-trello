@@ -22,4 +22,4 @@ psql_file="${0/.sh/.psql}"
 
 # Can't use "-c" because that can't handle "psql-specific features"
 # see: <https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-INTERPOLATION>
-psql -v "table_name=$table_name" -v "doc_column=$doc_column" -v "file_to_load=$file_to_load" -f "$psql_file"
+psql -v "table_name=$table_name" -v "doc_column=$doc_column" -v "file_to_load=$file_to_load" -f "$psql_file"|sed 's/^INSERT /UPSERT /'

@@ -43,8 +43,8 @@ as
 	,      t.doc->'pinned'='true'   as pinned
 	,      t.doc->'starred'='true'  as starred
 	,      t.doc->'closed'='true'   as closed
-	,      replace(t.doc->>'dateLastActivity','T',' ')::timestamp with time zone as date_last_activity
-	,      replace(t.doc->>'dateLastView','T',' ')::timestamp with time zone     as date_last_view
+	,      replace(t.doc->>'dateLastActivity','T',' ')::timestamptz as date_last_activity
+	,      replace(t.doc->>'dateLastView','T',' ')::timestamptz     as date_last_view
 	from trello t
 	order by 3
 ;
@@ -57,7 +57,7 @@ create view trello_action as
 	,      c.value->>'id'                as id
 	,      c.value->>'type'              as type
 	,      c.value->>'idMemberCreator'   as id_member_creator
-	,      replace(c.value->>'date','T',' ')::timestamp with time zone as date
+	,      replace(c.value->>'date','T',' ')::timestamptz as date
 	from trello t
 	,    jsonb_array_elements(t.doc#>'{actions}') c
 	order by 1
@@ -71,14 +71,14 @@ create view trello_card as
 	,      c.value->>'desc'              as description
 	,      (c.value->>'pos')::numeric    as pos
 	,      c.value->>'url'               as url
-	,      replace(c.value->>'due','T',' ')::timestamp with time zone as due
+	,      replace(c.value->>'due','T',' ')::timestamptz as due
 	,      c.value->'dueComplete'='true' as due_complete
 	,      c.value->'closed'='true'      as closed
 	,      c.value->'subscribed'='true'  as subscribed
 	,      c.value->>'idList'            as id_list
 	,      c.value->'idLabels'           as id_labels --jsonb array[string]
 	,      c.value->'idMembers'          as id_members --jsonb array[string]
-	,      replace(c.value->>'dateLastActivity','T',' ')::timestamp with time zone as date_last_activity
+	,      replace(c.value->>'dateLastActivity','T',' ')::timestamptz as date_last_activity
 	from trello t
 	,    jsonb_array_elements(t.doc#>'{cards}') c
 	order by 1
