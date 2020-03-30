@@ -2,9 +2,35 @@ drop table if exists trello cascade
 ;
 
 create table trello
-(   id   serial  PRIMARY KEY
-,   doc  jsonb   NOT NULL
+(   id   serial  primary key
+,   doc_id text  not null unique
+,   doc  jsonb   not null
 )
+;
+
+--| Create function+triggers to update <doc_id> from <doc>
+create or replace function trigger_set_doc_id (
+	) returns trigger as
+$$
+begin
+	NEW.doc_id = (select NEW.doc->>'id');
+	return new;
+end;
+$$
+language plpgsql
+;
+--drop trigger if exists test_table_changed on trello;
+create trigger trello_inserted
+	before insert on trello
+	for each row
+	execute procedure trigger_set_doc_id()
+;
+--drop trigger if exists test_table_changed on trello;
+create trigger trello_changed
+	before update on trello
+	for each row
+	when (OLD.doc is distinct from NEW.doc)
+	execute procedure trigger_set_doc_id()
 ;
 
 create view trello_board
@@ -23,8 +49,8 @@ as
 	order by 3
 ;
 
---   views: actions, cards, checklists, labels, lists, members
---no views: customFields, idTags, labelNames, limits, memberships, pluginData, powerUps, prefs
+--|    views: actions, cards, checklists, labels, lists, members
+--| no views: customFields, idTags, labelNames, limits, memberships, pluginData, powerUps, prefs
 
 create view trello_action as
 	select t.id                          as doc_id
@@ -115,12 +141,12 @@ as
 	order by 3
 ;
 
--- other helpful views
+--| Other helpful views
 
 create view trello_all_ids
 as
-with the_data as (
-		select l.value->>'id'  as id
+with the_data as 
+	(	select l.value->>'id'  as id
 		,      'label'         as what
 		,      array_agg(t.id) as doc_ids
 		from trello t
@@ -171,7 +197,8 @@ with the_data as (
 	)
 	select what
 	,      id
-	-- Trello id's generated in MongoDB: https://steveridout.github.io/mongo-object-time/
+	       --| Trello id's generated in MongoDB: https://steveridout.github.io/mongo-object-time/
+	       --| Convert hexadecimal in Postgres: https://stackoverflow.com/a/8335376/56
 	,      to_timestamp(('x'||substring(id for 8))::bit(32)::int) as creation_date
 	from the_data
 	order by 1

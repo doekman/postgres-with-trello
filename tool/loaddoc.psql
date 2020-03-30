@@ -1,2 +1,7 @@
 \set content `cat :file_to_load`
-INSERT INTO :"table_name"(:"doc_column") VALUES(:'content');
+insert into :"table_name"(:"doc_column")
+values(:'content')
+on conflict(doc_id)
+do update 
+set doc = EXCLUDED.doc
+;

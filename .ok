@@ -2,7 +2,8 @@
 make # shows usage
 make trello # create table+views
 export PGDATABASE=doc_db # for when using `make CREATE`
-make DROP CREATE trello # create table+views
+make CREATE trello # create database, and table+views
 # Data commands
-tool/loaddoc.sh data/simple_board.json # Append example file to the database table
+tool/loaddoc.sh data/simple_board_v1.json # UPSERT example file to the database table
+tool/loaddoc.sh data/simple_board_v2.json # UPSERT example file in the database table
 psql -c "TRUNCATE TABLE trello RESTART IDENTITY" # Clears database table
