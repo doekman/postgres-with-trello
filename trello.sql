@@ -119,52 +119,61 @@ as
 
 create view trello_all_ids
 as
-	select l.value->>'id'  as id
-	,      'label'         as what
-	,      array_agg(t.id) as doc_ids
-	from trello t
-	,    jsonb_array_elements(t.doc#>'{labels}') l
-	group by 1
-union
-	select l.value->>'id'  as id
-	,      'list'         as what
-	,      array_agg(t.id) as doc_ids
-	from trello t
-	,    jsonb_array_elements(t.doc#>'{lists}') l
-	group by 1
-union
-	select l.value->>'id'  as id
-	,      'member'        as what
-	,      array_agg(t.id) as doc_ids
-	from trello t
-	,    jsonb_array_elements(t.doc#>'{members}') l
-	group by 1
-union
-	select l.value->>'id'  as id
-	,      'card'          as what
-	,      array_agg(t.id) as doc_ids
-	from trello t
-	,    jsonb_array_elements(t.doc#>'{cards}') l
-	group by 1
-union
-	select l.value->>'id'  as id
-	,      'action'        as what
-	,      array_agg(t.id) as doc_ids
-	from trello t
-	,    jsonb_array_elements(t.doc#>'{actions}') l
-	group by 1
-union
-	select l.value->>'id'  as id
-	,      'membership'    as what
-	,      array_agg(t.id) as doc_ids
-	from trello t
-	,    jsonb_array_elements(t.doc#>'{memberships}') l
-	group by 1
-union
-	select l.value->>'id'  as id
-	,      'checklist'     as what
-	,      array_agg(t.id) as doc_ids
-	from trello t
-	,    jsonb_array_elements(t.doc#>'{checklists}') l
-	group by 1
+with the_data as (
+		select l.value->>'id'  as id
+		,      'label'         as what
+		,      array_agg(t.id) as doc_ids
+		from trello t
+		,    jsonb_array_elements(t.doc#>'{labels}') l
+		group by 1
+	union
+		select l.value->>'id'  as id
+		,      'list'         as what
+		,      array_agg(t.id) as doc_ids
+		from trello t
+		,    jsonb_array_elements(t.doc#>'{lists}') l
+		group by 1
+	union
+		select l.value->>'id'  as id
+		,      'member'        as what
+		,      array_agg(t.id) as doc_ids
+		from trello t
+		,    jsonb_array_elements(t.doc#>'{members}') l
+		group by 1
+	union
+		select l.value->>'id'  as id
+		,      'card'          as what
+		,      array_agg(t.id) as doc_ids
+		from trello t
+		,    jsonb_array_elements(t.doc#>'{cards}') l
+		group by 1
+	union
+		select l.value->>'id'  as id
+		,      'action'        as what
+		,      array_agg(t.id) as doc_ids
+		from trello t
+		,    jsonb_array_elements(t.doc#>'{actions}') l
+		group by 1
+	union
+		select l.value->>'id'  as id
+		,      'membership'    as what
+		,      array_agg(t.id) as doc_ids
+		from trello t
+		,    jsonb_array_elements(t.doc#>'{memberships}') l
+		group by 1
+	union
+		select l.value->>'id'  as id
+		,      'checklist'     as what
+		,      array_agg(t.id) as doc_ids
+		from trello t
+		,    jsonb_array_elements(t.doc#>'{checklists}') l
+		group by 1
+	)
+	select what
+	,      id
+	-- Trello id's generated in MongoDB: https://steveridout.github.io/mongo-object-time/
+	,      to_timestamp(('x'||substring(id for 8))::bit(32)::int) as creation_date
+	from the_data
+	order by 1
+	,        2
 ;
