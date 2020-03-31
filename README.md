@@ -46,7 +46,7 @@ And to quit `psql`, type:
 More
 ----
 
-* There are some example queries in [queries.md]({% link queries.md %})
+* There are some example queries in [queries.md](queries.md)
 * If you want to contribute, please create an [issue][issue] so we can discuss first
 
 
