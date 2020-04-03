@@ -16,8 +16,8 @@ if [[ ! -r "$file_to_load" ]]; then
 	exit 1
 fi
 
-table_schema="public"
-table_name="trello"
+table_schema="trello"
+table_name="document"
 doc_column="doc"
 psql_file="${0/.sh/.psql}"
 

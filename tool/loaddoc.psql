@@ -2,6 +2,6 @@
 insert into :"table_schema".:"table_name"(:"doc_column")
 values(:'content')
 on conflict(doc_id)
-do update 
+do update -- In case of UPDATE, the "serial" sequence increate will be saved as well
 set doc = EXCLUDED.doc
 ;

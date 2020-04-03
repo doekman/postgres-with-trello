@@ -15,15 +15,11 @@ To get started, open a terminal session and go to this repository folder.
 
 	make 
 
-will show how you how to use the makefile.
+will show how you how to use the makefile. The command
 
-	export PGDATABASE=doc_db
+	make trello
 
-will set the database `psql` will be using. Now for some real action:
-
-	make CREATE trello
-
-asks make to create the database (CREATE) and the table+views (trello). Now load some data:
+will create the table+views (trello). Now load some data:
 
 	tool/loaddoc.sh data/simple_board.json
 
@@ -34,9 +30,9 @@ Now you are ready to query:
 
 The last command shows all tables and views you can query from. Let's query some:
 
-	select * from trello_board;
-	select * from trello_card where doc_id=1;
-	select * from trello_list;
+	select * from trello.board;
+	select * from trello.card where doc_id=1;
+	select * from trello.list;
 
 And to quit `psql`, type:
 
