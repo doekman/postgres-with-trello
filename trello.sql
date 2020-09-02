@@ -69,6 +69,7 @@ create view trello.action as
 create view trello.card as
 	select t.id                          as doc_id
 	,      c.value->>'id'                as id
+	,      c.value->>'isTemplate'='true' as is_template
 	,      c.value->>'name'              as name
 	,      c.value->>'desc'              as description
 	,      (c.value->>'pos')::numeric    as pos
@@ -205,4 +206,28 @@ with the_data as
 	from the_data
 	order by 1
 	,        2
+;
+
+-- Helpful funcion (maar is wel een beetje traag)
+/*  -- Deze duurt bij 10BE WOCO bord (700 kaarten) maar liefst 30 seconden
+	select id_labels
+	,      trello.first_label_name(id_labels)         first_label
+	,      trello.first_label_name(id_labels, 'blue') blue_label
+	,      trello.first_label_name(id_labels, 'sky')  sky_label
+	from trello.card
+	where doc_id=7
+	;
+*/
+
+CREATE OR REPLACE FUNCTION trello.first_label_name
+(	p_labels       jsonb          --array of label ids
+,	p_label_color  text   = NULL  --optionally filtered by color
+)	RETURNS        text AS
+$$
+SELECT l.name
+FROM trello.labels l
+WHERE (p_labels#>>'{}' @> ('"'||l.id||'"')::jsonb)
+  AND (p_label_color IS NULL OR p_label_color = l.color)
+$$
+    LANGUAGE SQL
 ;
