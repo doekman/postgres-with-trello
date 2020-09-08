@@ -1,4 +1,4 @@
-\set content `cat :file_to_load`
+\set content `cat ":file_to_load"`
 insert into :"table_schema".:"table_name"(:"doc_column")
 values(:'content')
 on conflict(doc_id)

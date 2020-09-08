@@ -217,7 +217,7 @@ with the_data as
 	from trello.card
 	where doc_id=7
 	;
-*/
+
 
 CREATE OR REPLACE FUNCTION trello.first_label_name
 (	p_labels       jsonb          --array of label ids
@@ -225,9 +225,9 @@ CREATE OR REPLACE FUNCTION trello.first_label_name
 )	RETURNS        text AS
 $$
 SELECT l.name
-FROM trello.labels l
+FROM trello.label l
 WHERE (p_labels#>>'{}' @> ('"'||l.id||'"')::jsonb)
   AND (p_label_color IS NULL OR p_label_color = l.color)
 $$
     LANGUAGE SQL
-;
+;*/
