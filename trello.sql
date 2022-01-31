@@ -51,7 +51,7 @@ as
 	order by 3
 ;
 
---|    views: actions, cards, checklists, labels, lists, members
+--|    views: action (subset comment), cards, checklists, labels, lists, members
 --| no views: customFields, idTags, labelNames, limits, memberships, pluginData, powerUps, prefs
 
 create view trello.action as
@@ -64,6 +64,24 @@ create view trello.action as
 	,    jsonb_array_elements(t.doc#>'{actions}') c
 	order by 1
 	,        5
+;
+
+create view trello.comment --subset of action
+as
+	select t.id                          as doc_id
+	,      c.value->>'id'                as id
+	,      c.value #>>'{data,text}'      as comment
+	,      c.value#>>'{idMemberCreator}' as id_member_creator
+	,      c.value#>>'{memberCreator,fullName}' as full_name_member_creator
+	,      c.value #>>'{data,card,id}'   as id_card
+	,      c.value #>>'{data,card,name}' as name_card
+	,      c.value #>>'{data,list,id}'   as id_list
+	,      c.value #>>'{data,list,name}' as name_list
+	,      replace(c.value->>'date','T',' ')::timestamptz as date_created
+	from trello.document t
+	,    jsonb_array_elements(t.doc#>'{actions}') c
+	where c.value->>'type' = 'commentCard'
+	order by c.value->>'date' desc
 ;
 
 create view trello.card as
