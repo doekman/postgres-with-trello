@@ -4,5 +4,5 @@ values(:'content')
 on conflict(doc_id)
 do update -- In case of UPDATE, the "serial" sequence increate will be saved as well
 set doc = EXCLUDED.doc
-returning id, doc_id, case when xmax::text::int > 0 then 'updated' else 'inserted' end
+returning id, doc_id, case when xmax::text::int > 0 then 'update' else 'insert' end as operation
 ;
