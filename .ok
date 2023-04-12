@@ -2,6 +2,7 @@
 make # shows usage
 make trello # create table+views in default database
 export PGDATABASE=doc_db # for when using `make CREATE`
+show.db: env | grep -E '^PG'
 make CREATE trello # create database, and table+views
 # Data commands
 tool/loaddoc.sh data/simple_board_v1.json # UPSERT example file to the database table
